@@ -13,6 +13,7 @@ import (
 	pbs "github.com/hashicorp/boundary/internal/gen/controller/servers/services"
 	"github.com/hashicorp/boundary/internal/observability/event"
 	"github.com/hashicorp/boundary/internal/proxy"
+	"github.com/hashicorp/boundary/internal/servers/common"
 	proxyHandlers "github.com/hashicorp/boundary/internal/servers/worker/proxy"
 	"github.com/hashicorp/boundary/internal/servers/worker/session"
 	"github.com/hashicorp/go-secure-stdlib/listenerutil"
@@ -63,6 +64,12 @@ func (w *Worker) handleProxy() http.HandlerFunc {
 		clientAddr := &net.TCPAddr{
 			IP:   net.ParseIP(clientIp),
 			Port: numPort,
+		}
+
+		userClientIp, err := common.ClientIpFromRequest(ctx, common.PrivateNetworks(ctx), r)
+		if err != nil {
+			event.WriteError(ctx, op, err, event.WithInfoMsg("unable to determine user IP"))
+			wr.WriteHeader(http.StatusInternalServerError)
 		}
 
 		siRaw, valid := w.sessionInfoMap.Load(sessionId)
@@ -216,6 +223,7 @@ func (w *Worker) handleProxy() http.HandlerFunc {
 		}
 
 		conf := proxyHandlers.Config{
+			UserClientIp:   userClientIp,
 			ClientAddress:  clientAddr,
 			ClientConn:     conn,
 			RemoteEndpoint: endpoint,

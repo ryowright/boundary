@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/boundary/internal/libs/alpnmux"
 	"github.com/hashicorp/boundary/internal/observability/event"
+	"github.com/hashicorp/boundary/internal/servers/common"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -26,6 +27,9 @@ func (w *Worker) startListeners() error {
 	logger, err := e.StandardLogger(w.baseContext, "listeners", event.ErrorType)
 	if err != nil {
 		return fmt.Errorf("%s: unable to initialize std logger: %w", op, err)
+	}
+	if err := common.InitPrivateNetworks(w.baseContext, common.PrivateCidrBlocks()); err != nil {
+		return fmt.Errorf("%s: unable to initialize private networks: %w", op, err)
 	}
 	for _, ln := range w.conf.Listeners {
 		for _, purpose := range ln.Config.Purpose {
