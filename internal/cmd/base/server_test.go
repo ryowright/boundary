@@ -268,7 +268,7 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expPublicClusterAddress: "127.0.0.1:8080",
 		},
 		{
-			name: "setting pubic cluster address to env var",
+			name: "setting public cluster address to env var",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
@@ -459,7 +459,7 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expPublicClusterAddress: "",
 		},
 		{
-			name: "using flag value to provoke error in SpitHostPort",
+			name: "using flag value to provoke error in SplitHostPort",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
@@ -560,7 +560,7 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expPublicAddress: "127.0.0.1:8080",
 		},
 		{
-			name: "setting pubic address to env var",
+			name: "setting public address to env var",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
@@ -578,7 +578,7 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expPublicAddress: "127.0.0.1:8080",
 		},
 		{
-			name: "setting public cluster address to ip template",
+			name: "setting public address to ip template",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
@@ -593,7 +593,7 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expPublicAddress: "127.0.0.1:9202",
 		},
 		{
-			name: "setting public cluster address to multiline ip template",
+			name: "setting public address to multiline ip template",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
@@ -751,7 +751,7 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expPublicAddress: "",
 		},
 		{
-			name: "using flag value to provoke error in SpitHostPort",
+			name: "using flag value to provoke error in SplitHostPort",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
 					Listeners: []*listenerutil.ListenerConfig{},
