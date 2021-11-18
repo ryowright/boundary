@@ -238,6 +238,54 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expPublicClusterAddress: ":9201",
 		},
 		{
+			name: "setting public cluster address directly with ip",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: "127.0.0.1",
+				},
+			},
+			inputFlagValue:          "",
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
+		},
+		{
+			name: "setting public cluster address directly with ip:port",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: "127.0.0.1:8080",
+				},
+			},
+			inputFlagValue:          "",
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:8080",
+		},
+		{
+			name: "setting pubic cluster address to env var",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: "env://TEST_ENV_VAR_FOR_CONTROLLER_ADDR",
+				},
+			},
+			inputFlagValue: "",
+			stateFn: func(t *testing.T) {
+				t.Setenv("TEST_ENV_VAR_FOR_CONTROLLER_ADDR", "127.0.0.1:8080")
+			},
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:8080",
+		},
+		{
 			name: "using flag value with ip only",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
@@ -407,6 +455,54 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expErr:           false,
 			expErrStr:        "",
 			expPublicAddress: ":9202",
+		},
+		{
+			name: "setting public address directly with ip",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: "127.0.0.1",
+				},
+			},
+			inputFlagValue:   "",
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
+		},
+		{
+			name: "setting public address directly with ip:port",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: "127.0.0.1:8080",
+				},
+			},
+			inputFlagValue:   "",
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:8080",
+		},
+		{
+			name: "setting pubic address to env var",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: "env://TEST_ENV_VAR_FOR_WORKER_ADDR",
+				},
+			},
+			inputFlagValue: "",
+			stateFn: func(t *testing.T) {
+				t.Setenv("TEST_ENV_VAR_FOR_WORKER_ADDR", "127.0.0.1:8080")
+			},
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:8080",
 		},
 		{
 			name: "using flag value with ip only",
