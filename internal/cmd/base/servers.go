@@ -636,17 +636,16 @@ func (b *Server) SetupControllerPublicClusterAddress(conf *config.Config, flagVa
 				}
 			}
 		}
-	} else if looksLikeTemplate(conf.Controller.PublicClusterAddr) {
-		var err error
-		conf.Controller.PublicClusterAddr, err = listenerutil.ParseSingleIPTemplate(conf.Controller.PublicClusterAddr)
-		if err != nil {
-			return fmt.Errorf("Error parsing IP template on controller public cluster addr: %w", err)
-		}
 	} else {
 		var err error
 		conf.Controller.PublicClusterAddr, err = parseutil.ParsePath(conf.Controller.PublicClusterAddr)
 		if err != nil && !errors.Is(err, parseutil.ErrNotAUrl) {
 			return fmt.Errorf("Error parsing public cluster addr: %w", err)
+		}
+
+		conf.Controller.PublicClusterAddr, err = listenerutil.ParseSingleIPTemplate(conf.Controller.PublicClusterAddr)
+		if err != nil {
+			return fmt.Errorf("Error parsing IP template on controller public cluster addr: %w", err)
 		}
 	}
 
@@ -680,17 +679,16 @@ func (b *Server) SetupWorkerPublicAddress(conf *config.Config, flagValue string)
 				}
 			}
 		}
-	} else if looksLikeTemplate(conf.Worker.PublicAddr) {
-		var err error
-		conf.Worker.PublicAddr, err = listenerutil.ParseSingleIPTemplate(conf.Worker.PublicAddr)
-		if err != nil {
-			return fmt.Errorf("Error parsing IP template on worker public addr: %w", err)
-		}
 	} else {
 		var err error
 		conf.Worker.PublicAddr, err = parseutil.ParsePath(conf.Worker.PublicAddr)
 		if err != nil && !errors.Is(err, parseutil.ErrNotAUrl) {
 			return fmt.Errorf("Error parsing public addr: %w", err)
+		}
+
+		conf.Worker.PublicAddr, err = listenerutil.ParseSingleIPTemplate(conf.Worker.PublicAddr)
+		if err != nil {
+			return fmt.Errorf("Error parsing IP template on worker public addr: %w", err)
 		}
 	}
 
@@ -705,10 +703,6 @@ func (b *Server) SetupWorkerPublicAddress(conf *config.Config, flagValue string)
 	}
 	conf.Worker.PublicAddr = net.JoinHostPort(host, port)
 	return nil
-}
-
-func looksLikeTemplate(s string) bool {
-	return strings.HasPrefix(s, "{{") && strings.HasSuffix(s, "}}")
 }
 
 // MakeSighupCh returns a channel that can be used for SIGHUP

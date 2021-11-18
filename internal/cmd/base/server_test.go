@@ -286,6 +286,24 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expPublicClusterAddress: "127.0.0.1:8080",
 		},
 		{
+			name: "setting public cluster address to env var that points to template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: "env://TEST_ENV_VAR_FOR_CONTROLLER_ADDR",
+				},
+			},
+			inputFlagValue: "",
+			stateFn: func(t *testing.T) {
+				t.Setenv("TEST_ENV_VAR_FOR_CONTROLLER_ADDR", `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`)
+			},
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
+		},
+		{
 			name: "setting public cluster address to ip template",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
@@ -576,6 +594,24 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expErr:           false,
 			expErrStr:        "",
 			expPublicAddress: "127.0.0.1:8080",
+		},
+		{
+			name: "setting public address to env var that points to template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: "env://TEST_ENV_VAR_FOR_WORKER_ADDR",
+				},
+			},
+			inputFlagValue: "",
+			stateFn: func(t *testing.T) {
+				t.Setenv("TEST_ENV_VAR_FOR_WORKER_ADDR", `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`)
+			},
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
 		},
 		{
 			name: "setting public address to ip template",
