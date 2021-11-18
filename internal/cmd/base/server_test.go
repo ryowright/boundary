@@ -286,6 +286,38 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expPublicClusterAddress: "127.0.0.1:8080",
 		},
 		{
+			name: "setting public cluster address to ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`,
+				},
+			},
+			inputFlagValue:          "",
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
+		},
+		{
+			name: "setting public cluster address to multiline ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{
+					PublicClusterAddr: `{{ with $local := GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" -}}
+					{{- $local | join "address" " " -}}
+				  {{- end }}`,
+				},
+			},
+			inputFlagValue:          "",
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
+		},
+		{
 			name: "using flag value with ip only",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
@@ -310,6 +342,34 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expErr:                  false,
 			expErrStr:               "",
 			expPublicClusterAddress: "127.0.0.1:8080",
+		},
+		{
+			name: "using flag value with ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{},
+			},
+			inputFlagValue:          `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`,
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
+		},
+		{
+			name: "using flag value with multiline ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{},
+			},
+			inputFlagValue: `{{ with $local := GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" -}}
+			  {{- $local | join "address" " " -}}
+			{{- end }}`,
+			expErr:                  false,
+			expErrStr:               "",
+			expPublicClusterAddress: "127.0.0.1:9201",
 		},
 		{
 			name: "using flag value to point to env var with ip only",
@@ -411,6 +471,19 @@ func TestSetupControllerPublicClusterAddress(t *testing.T) {
 			expErrStr:               "Error splitting public cluster adddress host/port: address abc::123: too many colons in address",
 			expPublicClusterAddress: "",
 		},
+		{
+			name: "bad ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Controller: &config.Controller{},
+			},
+			inputFlagValue:          "{{ somethingthatdoesntexist }}",
+			expErr:                  true,
+			expErrStr:               "Error parsing IP template on controller public cluster addr: unable to parse address template \"{{ somethingthatdoesntexist }}\": unable to parse template \"{{ somethingthatdoesntexist }}\": template: sockaddr.Parse:1: function \"somethingthatdoesntexist\" not defined",
+			expPublicClusterAddress: "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -505,6 +578,38 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expPublicAddress: "127.0.0.1:8080",
 		},
 		{
+			name: "setting public cluster address to ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`,
+				},
+			},
+			inputFlagValue:   "",
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
+		},
+		{
+			name: "setting public cluster address to multiline ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{
+					PublicAddr: `{{ with $local := GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" -}}
+					{{- $local | join "address" " " -}}
+				  {{- end }}`,
+				},
+			},
+			inputFlagValue:   "",
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
+		},
+		{
 			name: "using flag value with ip only",
 			inputConfig: &config.Config{
 				SharedConfig: &configutil.SharedConfig{
@@ -561,6 +666,34 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			expErr:           false,
 			expErrStr:        "",
 			expPublicAddress: "127.0.0.1:8080",
+		},
+		{
+			name: "using flag value with ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{},
+			},
+			inputFlagValue:   `{{ GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" | join "address" " " }}`,
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
+		},
+		{
+			name: "using flag value with multiline ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{},
+			},
+			inputFlagValue: `{{ with $local := GetAllInterfaces | include "flags" "loopback" | include "type" "IPV4" -}}
+			  {{- $local | join "address" " " -}}
+			{{- end }}`,
+			expErr:           false,
+			expErrStr:        "",
+			expPublicAddress: "127.0.0.1:9202",
 		},
 		{
 			name: "read address from listeners ip only",
@@ -628,6 +761,19 @@ func TestSetupWorkerPublicAddress(t *testing.T) {
 			inputFlagValue:   "abc::123",
 			expErr:           true,
 			expErrStr:        "Error splitting public adddress host/port: address abc::123: too many colons in address",
+			expPublicAddress: "",
+		},
+		{
+			name: "bad ip template",
+			inputConfig: &config.Config{
+				SharedConfig: &configutil.SharedConfig{
+					Listeners: []*listenerutil.ListenerConfig{},
+				},
+				Worker: &config.Worker{},
+			},
+			inputFlagValue:   "{{ somethingthatdoesntexist }}",
+			expErr:           true,
+			expErrStr:        "Error parsing IP template on worker public addr: unable to parse address template \"{{ somethingthatdoesntexist }}\": unable to parse template \"{{ somethingthatdoesntexist }}\": template: sockaddr.Parse:1: function \"somethingthatdoesntexist\" not defined",
 			expPublicAddress: "",
 		},
 	}

@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-secure-stdlib/configutil"
 	"github.com/hashicorp/go-secure-stdlib/gatedwriter"
+	"github.com/hashicorp/go-secure-stdlib/listenerutil"
 	"github.com/hashicorp/go-secure-stdlib/mlock"
 	"github.com/hashicorp/go-secure-stdlib/parseutil"
 	"github.com/hashicorp/go-secure-stdlib/reloadutil"
@@ -635,6 +636,12 @@ func (b *Server) SetupControllerPublicClusterAddress(conf *config.Config, flagVa
 				}
 			}
 		}
+	} else if looksLikeTemplate(conf.Controller.PublicClusterAddr) {
+		var err error
+		conf.Controller.PublicClusterAddr, err = listenerutil.ParseSingleIPTemplate(conf.Controller.PublicClusterAddr)
+		if err != nil {
+			return fmt.Errorf("Error parsing IP template on controller public cluster addr: %w", err)
+		}
 	} else {
 		var err error
 		conf.Controller.PublicClusterAddr, err = parseutil.ParsePath(conf.Controller.PublicClusterAddr)
@@ -642,6 +649,7 @@ func (b *Server) SetupControllerPublicClusterAddress(conf *config.Config, flagVa
 			return fmt.Errorf("Error parsing public cluster addr: %w", err)
 		}
 	}
+
 	host, port, err := net.SplitHostPort(conf.Controller.PublicClusterAddr)
 	if err != nil {
 		if strings.Contains(err.Error(), "missing port") {
@@ -672,6 +680,12 @@ func (b *Server) SetupWorkerPublicAddress(conf *config.Config, flagValue string)
 				}
 			}
 		}
+	} else if looksLikeTemplate(conf.Worker.PublicAddr) {
+		var err error
+		conf.Worker.PublicAddr, err = listenerutil.ParseSingleIPTemplate(conf.Worker.PublicAddr)
+		if err != nil {
+			return fmt.Errorf("Error parsing IP template on worker public addr: %w", err)
+		}
 	} else {
 		var err error
 		conf.Worker.PublicAddr, err = parseutil.ParsePath(conf.Worker.PublicAddr)
@@ -679,6 +693,7 @@ func (b *Server) SetupWorkerPublicAddress(conf *config.Config, flagValue string)
 			return fmt.Errorf("Error parsing public addr: %w", err)
 		}
 	}
+
 	host, port, err := net.SplitHostPort(conf.Worker.PublicAddr)
 	if err != nil {
 		if strings.Contains(err.Error(), "missing port") {
@@ -690,6 +705,10 @@ func (b *Server) SetupWorkerPublicAddress(conf *config.Config, flagValue string)
 	}
 	conf.Worker.PublicAddr = net.JoinHostPort(host, port)
 	return nil
+}
+
+func looksLikeTemplate(s string) bool {
+	return strings.HasPrefix(s, "{{") && strings.HasSuffix(s, "}}")
 }
 
 // MakeSighupCh returns a channel that can be used for SIGHUP
